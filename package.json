@@ -6,7 +6,11 @@
   "scripts": {
     "test": "test"
   },
-  "author": "@mrdotb",
+  "author": "mrdotb",
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/MRdotB/yifysubtitles"
+  },
   "license": "MIT",
   "dependencies": {
     "etl": "^0.3.32",
