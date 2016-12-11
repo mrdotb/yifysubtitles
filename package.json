@@ -1,17 +1,27 @@
 {
   "name": "yifysubtitles",
   "version": "1.0.0",
-  "description": "A simple wrapper to use yifysubtitles api.",
+  "description": "A simple wrapper to download subtitles from yifysubtitles api.",
   "main": "index.js",
   "scripts": {
     "test": "test"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "@mrdotb",
+  "license": "MIT",
   "dependencies": {
     "etl": "^0.3.32",
     "request": "^2.79.0",
     "request-promise": "^4.1.1",
     "unzipper": "^0.7.2"
-  }
+  },
+    "keywords": [
+        "yifysubtitles",
+        "yify",
+        "subtitles",
+        "api",
+        "wrapper",
+        "srt",
+        "movies",
+        "films"
+    ]
 }
