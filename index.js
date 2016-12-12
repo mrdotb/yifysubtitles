@@ -1,6 +1,7 @@
 const rp = require('request-promise');
 const etl = require('etl');
 const unzipper = require('unzipper').Parse;
+const srt2vtt = require('srt-to-vtt');
 
 const apiUri = 'http://api.yifysubtitles.com/subs';
 const downloadUri = 'http://yifysubtitles.com';
@@ -36,10 +37,11 @@ const download = (lang, url, path) => {
 	return rp(options)
 		.pipe(unzipper())
 		.pipe(etl.map(entry => {
-			const fileName = entry.path;
+			const fileName = entry.path.replace('srt', 'vtt');
 			if (!fileName.match(reg)) {
 				writed = fileName;
 				return entry
+					.pipe(srt2vtt())
 					.pipe(etl.toFile(path + '/' + fileName));
 			}
 			entry.autodrain();
