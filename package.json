@@ -1,6 +1,6 @@
 {
   "name": "yifysubtitles",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A simple wrapper to download subtitles from yifysubtitles api.",
   "main": "index.js",
   "scripts": {

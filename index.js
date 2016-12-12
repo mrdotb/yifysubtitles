@@ -24,7 +24,7 @@ const langFilter = (subs, langs) => {
 	}, {});
 };
 
-const download = (url, path) => {
+const download = (lang, url, path) => {
 	let writed = '';
 	const reg = /MACOSX/;
 	const options = {
@@ -45,11 +45,11 @@ const download = (url, path) => {
 			entry.autodrain();
 		}))
 		.promise()
-		.then(() => writed);
+		.then(() => ({lang: lang, path: writed}));
 };
 
 const downloads = (langs, path) => {
-	const promises = Object.keys(langs).map(lang => download(langs[lang].url, path));
+	const promises = Object.keys(langs).map(lang => download(lang, langs[lang].url, path));
 	return Promise.all(promises);
 };
 
