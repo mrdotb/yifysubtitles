@@ -1,19 +1,32 @@
-const rp = require('request-promise');
-const etl = require('etl');
+const fs = require('fs');
+const join = require('path').join;
+const got = require('got');
+const streamz = require('streamz');
 const unzipper = require('unzipper').Parse;
 const srt2vtt = require('srt-to-vtt');
 
 const apiUri = 'http://api.yifysubtitles.com/subs';
 const downloadUri = 'http://yifysubtitles.com';
+const langsFormat = require('./langs');
 
 const apiCall = imdbId => {
-	const options = {
-		method: 'GET',
-		uri: apiUri + '/' + imdbId,
-		json: true
-	};
+	return got(`${apiUri}/${imdbId}`, {json: true})
+		.then(res => (
+			(res.body.subtitles === 0) ?
+				Promise.resolve([]) :
+				res.body
+		));
+};
 
-	return rp(options);
+const formatLangs = userLangs => {
+	const has = Object.prototype.hasOwnProperty;
+
+	return userLangs.reduce((acc, lang) => {
+		if (has.call(langsFormat, lang)) {
+			acc.push(langsFormat[lang]);
+		}
+		return acc;
+	}, []);
 };
 
 const langFilter = (subs, langs) => {
@@ -26,44 +39,35 @@ const langFilter = (subs, langs) => {
 };
 
 const download = (lang, url, path) => {
+	const reg = /(\.srt)$/i;
+	const reg1 = /MACOSX/;
 	let writed = '';
-	const reg = /MACOSX/;
-	const options = {
-		method: 'GET',
-		uri: downloadUri + url,
-		json: true
-	};
 
-	return rp(options)
+	return got.stream(downloadUri + url)
 		.pipe(unzipper())
-		.pipe(etl.map(entry => {
-			const fileName = entry.path.replace('srt', 'vtt');
-			if (!fileName.match(reg)) {
-				writed = fileName;
+		.pipe(streamz(entry => {
+			console.log(entry.path);
+			if (entry.path.match(reg) && !entry.path.match(reg1)) {
+				writed = entry.path.replace('srt', 'vtt');
 				return entry
 					.pipe(srt2vtt())
-					.pipe(etl.toFile(path + '/' + fileName));
+					.pipe(fs.createWriteStream(join(path, writed)));
 			}
 			entry.autodrain();
 		}))
 		.promise()
-		.then(() => ({lang: lang, path: writed}));
+		.then(() => ({lang: lang, langShort: lang, path: writed}));
 };
 
-const downloads = (langs, path) => {
-	const promises = Object.keys(langs).map(lang => download(lang, langs[lang].url, path));
+const downloads = (res, path) => {
+	const promises = Object.keys(res).map(lang => download(lang, res[lang].url, path));
 	return Promise.all(promises);
 };
 
 const yifysubtitles = (imdbId, langs, path = '/tmp') => {
 	return apiCall(imdbId)
-		.then(res => {
-			if (res.subtitles > 0) {
-				return langFilter(res.subs[imdbId], langs);
-			}
-			throw new Error('No subs founds for this imdbId');
-		})
-		.then(langs => downloads(langs, path));
+		.then(res => langFilter(res.subs[imdbId], formatLangs(langs)))
+		.then(res => downloads(res, path));
 };
 
 module.exports = yifysubtitles;
