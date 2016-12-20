@@ -29,6 +29,11 @@ const formatLangs = userLangs => {
 	}, []);
 };
 
+const formatLangShort = lang => {
+	const index = Object.values(langsFormat).indexOf(lang);
+	return Object.keys(langsFormat)[index];
+};
+
 const langFilter = (subs, langs) => {
 	return Object.keys(subs).reduce((acc, apiLang) => {
 		if (langs.some(userLang => userLang === apiLang)) {
@@ -46,7 +51,6 @@ const download = (lang, url, path) => {
 	return got.stream(downloadUri + url)
 		.pipe(unzipper())
 		.pipe(streamz(entry => {
-			console.log(entry.path);
 			if (entry.path.match(reg) && !entry.path.match(reg1)) {
 				writed = entry.path.replace('srt', 'vtt');
 				return entry
@@ -56,7 +60,7 @@ const download = (lang, url, path) => {
 			entry.autodrain();
 		}))
 		.promise()
-		.then(() => ({lang: lang, langShort: lang, path: writed}));
+		.then(() => ({lang: lang, langShort: formatLangShort(lang), path: writed}));
 };
 
 const downloads = (res, path) => {
