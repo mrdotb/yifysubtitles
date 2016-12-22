@@ -1,37 +1,27 @@
 const fs = require('fs');
-const join = require('path').join;
+const path = require('path');
 const got = require('got');
+const pMap = require('p-map');
 const streamz = require('streamz');
 const unzipper = require('unzipper').Parse;
 const srt2vtt = require('srt-to-vtt');
+const langsFormat = require('./langs');
 
 const apiUri = 'http://api.yifysubtitles.com/subs';
 const downloadUri = 'http://yifysubtitles.com';
-const langsFormat = require('./langs');
+const langV = Object.values(langsFormat);
+const langK = Object.keys(langsFormat);
+
+const formatLangLong = lang => (langV[langK.indexOf(lang)]);
+const formatLangShort = lang => (langK[langV.indexOf(lang)]);
 
 const apiCall = imdbId => {
 	return got(`${apiUri}/${imdbId}`, {json: true})
 		.then(res => (
 			(res.body.subtitles === 0) ?
-				Promise.resolve([]) :
+				Promise.resolve({}) :
 				res.body
 		));
-};
-
-const formatLangs = userLangs => {
-	const has = Object.prototype.hasOwnProperty;
-
-	return userLangs.reduce((acc, lang) => {
-		if (has.call(langsFormat, lang)) {
-			acc.push(langsFormat[lang]);
-		}
-		return acc;
-	}, []);
-};
-
-const formatLangShort = lang => {
-	const index = Object.values(langsFormat).indexOf(lang);
-	return Object.keys(langsFormat)[index];
 };
 
 const langFilter = (subs, langs) => {
@@ -43,35 +33,53 @@ const langFilter = (subs, langs) => {
 	}, {});
 };
 
-const download = (lang, url, path) => {
-	const reg = /(\.srt)$/i;
-	const reg1 = /MACOSX/;
+const download = (lang, url, link) => {
 	let writed = '';
+	let fullPath = '';
 
 	return got.stream(downloadUri + url)
 		.pipe(unzipper())
 		.pipe(streamz(entry => {
-			if (entry.path.match(reg) && !entry.path.match(reg1)) {
+			const parsedPath = path.parse(entry.path);
+			if (parsedPath.dir === '' && parsedPath.ext === '.srt') {
 				writed = entry.path.replace('srt', 'vtt');
+				fullPath = path.join(link, writed);
 				return entry
 					.pipe(srt2vtt())
-					.pipe(fs.createWriteStream(join(path, writed)));
+					.pipe(fs.createWriteStream(fullPath));
 			}
 			entry.autodrain();
 		}))
 		.promise()
-		.then(() => ({lang: lang, langShort: formatLangShort(lang), path: writed}));
+		.then(() => ({lang: lang, langShort: formatLangShort(lang), path: fullPath, fileName: writed}));
 };
 
-const downloads = (res, path) => {
-	const promises = Object.keys(res).map(lang => download(lang, res[lang].url, path));
-	return Promise.all(promises);
+const downloads = (res, opts) => {
+	const {concurrency, path} = opts;
+
+	return pMap(Object.keys(res), lang => download(lang, res[lang].url, path), concurrency);
 };
 
-const yifysubtitles = (imdbId, langs, path = '/tmp') => {
+const runConditional = (imdbId, opts, res) => (
+	Promise.resolve(langFilter(res.subs[imdbId], opts.langs.map(formatLangLong)))
+			.then(res => downloads(res, opts))
+);
+
+const yifysubtitles = (imdbId, opts) => {
+	opts = Object.assign({
+		path: __dirname,
+		langs: ['en'],
+		concurrency: Infinity
+	}, opts);
+
+	if (opts.langs.constructor !== Array) {
+		throw new TypeError('Expected `langs` to be an array');
+	} else if (opts.langs.some(lang => langK.indexOf(lang) === -1)) {
+		throw new TypeError(`Expected \`langs\` members to be in ${langK}`);
+	}
+
 	return apiCall(imdbId)
-		.then(res => langFilter(res.subs[imdbId], formatLangs(langs)))
-		.then(res => downloads(res, path));
+		.then(res => Object.keys(res).length ? runConditional(imdbId, opts, res) : []);
 };
 
 module.exports = yifysubtitles;

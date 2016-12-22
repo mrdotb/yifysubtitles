@@ -1,7 +1,8 @@
 const yifysubtitles = require('../index');
 
 console.log('dirname', __dirname);
-yifysubtitles('tt3774114', ['french', 'english', 'dutch'], __dirname)
+
+yifysubtitles('tt1156398', {langs: ['fr', 'en', 'zh'], path: '/tmp'})
 	.then(res => {
 		console.log('res', res);
 	})

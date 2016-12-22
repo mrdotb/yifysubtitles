@@ -1,6 +1,6 @@
 {
   "name": "yifysubtitles",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "A simple wrapper to download subtitles from yifysubtitles api.",
   "license": "MIT",
   "repository": {
@@ -24,10 +24,12 @@
     "got": "^6.6.3",
     "srt-to-vtt": "^1.1.1",
     "streamz": "^1.6.2",
-    "unzipper": "^0.7.2"
+    "unzipper": "^0.7.2",
+    "p-map": "^1.1.0"
   },
   "devDependencies": {
-    "ava": "^0.17.0"
+    "ava": "^0.17.0",
+    "pify": "^2.3.0"
   },
   "keywords": [
     "download",
