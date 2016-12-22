@@ -9,8 +9,8 @@ const langsFormat = require('./langs');
 
 const apiUri = 'http://api.yifysubtitles.com/subs';
 const downloadUri = 'http://yifysubtitles.com';
-const langV = Object.values(langsFormat);
 const langK = Object.keys(langsFormat);
+const langV = langK.map(i => langsFormat[i]);
 
 const formatLangLong = lang => (langV[langK.indexOf(lang)]);
 const formatLangShort = lang => (langK[langV.indexOf(lang)]);
