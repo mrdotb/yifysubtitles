@@ -60,10 +60,13 @@ const downloads = (res, opts) => {
 	return pMap(Object.keys(res), lang => download(lang, res[lang].url, path), concurrency);
 };
 
-const runConditional = (imdbId, opts, res) => (
-	Promise.resolve(langFilter(res.subs[imdbId], opts.langs.map(formatLangLong)))
-			.then(res => downloads(res, opts))
-);
+const runConditional = (imdbId, opts, res) => {
+	if (!res.success) {
+		return Promise.reject(res.message);
+	}
+	return Promise.resolve(langFilter(res.subs[imdbId], opts.langs.map(formatLangLong)))
+				.then(res => downloads(res, opts));
+};
 
 const yifysubtitles = (imdbId, opts) => {
 	opts = Object.assign({
