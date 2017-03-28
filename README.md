@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/MRdotB/yifysubtitles.svg?branch=master)](https://travis-ci.org/MRdotB/yifysubtitles)
 
 # yifysubtitles
-> Search, download and convert subtitles in [VTT format](https://developer.mozilla.org/en/docs/Web/API/Web_Video_Text_Tracks_Format) for [YTS movies](https://yts.ag/)
+> Download and convert subtitles in [VTT format](https://developer.mozilla.org/en/docs/Web/API/Web_Video_Text_Tracks_Format) for [YTS movies](https://yts.ag/)
 
 
 ## Install

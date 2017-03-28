@@ -5,9 +5,12 @@ const pMap = require('p-map');
 const streamz = require('streamz');
 const unzipper = require('unzipper').Parse;
 const srt2vtt = require('srt-to-vtt');
+const cheerio = require('cheerio');
+
 const langsFormat = require('./langs');
 
 const apiUri = 'http://api.yifysubtitles.com/subs';
+const uri = 'http://www.yifysubtitles.com/movie-imdb';
 const downloadUri = 'http://yifysubtitles.com';
 const langK = Object.keys(langsFormat);
 const langV = langK.map(i => langsFormat[i]);
@@ -15,22 +18,31 @@ const langV = langK.map(i => langsFormat[i]);
 const formatLangLong = lang => (langV[langK.indexOf(lang)]);
 const formatLangShort = lang => (langK[langV.indexOf(lang)]);
 
-const apiCall = imdbId => {
-	return got(`${apiUri}/${imdbId}`, {json: true})
-		.then(res => (
-			(res.body.subtitles === 0) ?
-				Promise.resolve({}) :
-				res.body
-		));
+// Since yifysubtitle api is not working anymore we scrape the site instead
+const scrape = imdbId => {
+	return got(`${uri}/${imdbId}`)
+		.then(res => cheerio.load(res.body))
+		.then($ => {
+			return $('tbody tr').map((i, el) => {
+				const $el = $(el);
+				return {
+					rating: $el.find('.rating-cell').text(),
+					language: $el.find('.flag-cell .sub-lang').text().toLowerCase(),
+					url: $el.find('.download-cell a').attr('href').replace('subtitles/', 'subtitle/') + '.zip'
+				};
+			}).get();
+		})
 };
 
 const langFilter = (subs, langs) => {
-	return Object.keys(subs).reduce((acc, apiLang) => {
-		if (langs.some(userLang => userLang === apiLang)) {
-			acc[apiLang] = subs[apiLang].sort((a, b) => b.rating - a.rating)[0];
+	const data = langs.reduce((acc, l) => {
+		const lang = subs.filter(s => s.language === l).sort((a, b) => b.rating - a.rating);
+		if (lang.length) {
+			acc[l] = lang[0];
 		}
 		return acc;
 	}, {});
+	return data
 };
 
 const download = (lang, url, link) => {
@@ -61,10 +73,7 @@ const downloads = (res, opts) => {
 };
 
 const runConditional = (imdbId, opts, res) => {
-	if (!res.success) {
-		return Promise.reject(res.message);
-	}
-	return Promise.resolve(langFilter(res.subs[imdbId], opts.langs.map(formatLangLong)))
+	return Promise.resolve(langFilter(res, opts.langs.map(formatLangLong)))
 				.then(res => downloads(res, opts));
 };
 
@@ -81,8 +90,8 @@ const yifysubtitles = (imdbId, opts) => {
 		throw new TypeError(`Expected \`langs\` members to be in ${langK}`);
 	}
 
-	return apiCall(imdbId)
-		.then(res => Object.keys(res).length ? runConditional(imdbId, opts, res) : []);
+	return scrape(imdbId)
+		.then(res => res.length ? runConditional(imdbId, opts, res) : []);
 };
 
 module.exports = yifysubtitles;
