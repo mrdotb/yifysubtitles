@@ -70,11 +70,18 @@ Type: `String`<br>
 Default: `__dirname`<br>
 The path where the subtitles are going to be stored.
 
+##### format
+
+Type: `String`<br>
+Default: `vtt`<br>
+The format of subtitles.
+
 ##### concurrency
 
 Type: `number`<br>
 Default: `Infinity`<br>
 Minimum: `1`
+Download multiples subtitles concurency.
 
 ## License
 

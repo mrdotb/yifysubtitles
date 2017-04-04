@@ -1,6 +1,6 @@
 {
   "name": "yifysubtitles",
-  "version": "2.0.2",
+  "version": "2.1.2",
   "description": "A simple wrapper to download subtitles from the yifysubtitles website.",
   "license": "MIT",
   "repository": {

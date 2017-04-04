@@ -45,7 +45,7 @@ const langFilter = (subs, langs) => {
 	return data
 };
 
-const download = (lang, url, link) => {
+const downloadFormat = format => (lang, url, link) => {
 	let writed = '';
 	let fullPath = '';
 
@@ -54,19 +54,21 @@ const download = (lang, url, link) => {
 		.pipe(streamz(entry => {
 			const parsedPath = path.parse(entry.path);
 			if (parsedPath.dir === '' && parsedPath.ext === '.srt') {
-				writed = entry.path.replace('srt', 'vtt');
+				writed = format === 'srt' ? entry.path : entry.path.replace('srt', 'vtt');
 				fullPath = path.join(link, writed);
-				return entry
-					.pipe(srt2vtt())
-					.pipe(fs.createWriteStream(fullPath));
+				return format === 'srt'
+					? entry.pipe(fs.createWriteStream(fullPath))
+					: entry.pipe(srt2vtt()).pipe(fs.createWriteStream(fullPath));
 			}
 			entry.autodrain();
 		}))
 		.promise()
 		.then(() => ({lang: lang, langShort: formatLangShort(lang), path: fullPath, fileName: writed}));
+
 };
 
 const downloads = (res, opts) => {
+	const download = downloadFormat(opts.format);
 	const {concurrency, path} = opts;
 
 	return pMap(Object.keys(res), lang => download(lang, res[lang].url, path), concurrency);
@@ -81,7 +83,8 @@ const yifysubtitles = (imdbId, opts) => {
 	opts = Object.assign({
 		path: __dirname,
 		langs: ['en'],
-		concurrency: Infinity
+		concurrency: Infinity,
+		format: 'vtt'
 	}, opts);
 
 	if (opts.langs.constructor !== Array) {
