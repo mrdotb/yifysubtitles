@@ -74,7 +74,7 @@ The path where the subtitles are going to be stored.
 
 Type: `String`<br>
 Default: `vtt`<br>
-The format of subtitles.
+The format of subtitles. ['srt', 'vtt']
 
 ##### concurrency
 
