@@ -1,5 +1,5 @@
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
-[![Build Status](https://travis-ci.org/mrdotb/yifysubtitles.svg?branch=master)](https://travis-ci.org/MRdotB/yifysubtitles)
+[![Build Status](https://travis-ci.org/mrdotb/yifysubtitles.svg?branch=master)](https://travis-ci.org/mrdotb/yifysubtitles)
 
 # yifysubtitles
 > Download and convert subtitles in [VTT format](https://developer.mozilla.org/en/docs/Web/API/Web_Video_Text_Tracks_Format) for [YTS movies](https://yts.ag/)
