@@ -45,6 +45,15 @@ test('download zombieland subtitles in fr, en, nl', async t => {
 	await pMap(paths, path => pify(fs.unlink)(path));
 });
 
+test('download rango subtitles in ir', async t => {
+	const subtitles = await yifysubtitles('tt1192628', {path: downloadDir, langs: ['ir']});
+
+	t.is(subtitles.length, 1, 'results length should be 1');
+
+	const paths = subtitles.map(subtitle => subtitle.path);
+	await pMap(paths, path => t.notThrows(pify(fs.access)(path), 'file should exist'));
+	await pMap(paths, path => pify(fs.unlink)(path));
+});
 
 test.after.always('cleanup: delete tmp dir', async t => {
 	await pify(fs.rmdir)(downloadDir);
