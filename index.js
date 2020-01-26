@@ -59,19 +59,20 @@ const langFilter = (subs, langs) => {
 const downloadFormat = format => (lang, url, link) => {
   let writed = "";
   let fullPath = "";
+
   return got
     .stream(downloadUri + url)
     .pipe(unzipper())
     .pipe(
       streamz(entry => {
         const parsedPath = path.parse(entry.path);
-        // Add Language to subtitle name and delete spaces
+        // Add Language to subtitle name and deete spaces
         entry.path = entry.path
           .replace(/\s+/g, ".")
           .replace(parsedPath.ext, `_${lang}_${parsedPath.ext}`);
         if (parsedPath.dir === "" && parsedPath.ext === ".srt") {
           writed =
-            format === "srt" ? entry.path : entry.path.replace(".srt", ".vtt");
+            format === "srt" ? entry.path : entry.path.replace("srt", "vtt");
           fullPath = path.join(link, writed);
           return format === "srt"
             ? entry.pipe(fs.createWriteStream(fullPath))
