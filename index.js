@@ -67,9 +67,10 @@ const downloadFormat = format => (lang, url, link) => {
       streamz(entry => {
         const parsedPath = path.parse(entry.path);
         // Add Language to subtitle name and deete spaces
+        const escapedLang = lang.replace('/', '-');
         entry.path = entry.path
           .replace(/\s+/g, ".")
-          .replace(parsedPath.ext, `_${lang}_${parsedPath.ext}`);
+          .replace(parsedPath.ext, `_${escapedLang}_${parsedPath.ext}`);
         if (parsedPath.dir === "" && parsedPath.ext === ".srt") {
           writed =
             format === "srt" ? entry.path : entry.path.replace("srt", "vtt");
