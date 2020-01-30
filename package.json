@@ -1,23 +1,27 @@
 {
   "name": "yifysubtitles",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "description": "A simple wrapper to download subtitles from the yifysubtitles website.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MRdotB/yifysubtitles"
+    "url": "https://github.com/mrdotb/yifysubtitles"
   },
   "author": {
     "name": "mrdotb",
-    "email": "baptiste.chaleil@gmail.com"
+    "email": "mrdotb@protonmail.com"
   },
   "main": "index.js",
   "scripts": {
-    "test": "ava"
+    "test": "ava",
+    "lint": "xo --fix"
   },
   "ava": {
     "files": "test/*.js",
     "verbose": "true"
+  },
+  "xo": {
+    "space": true
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
@@ -30,6 +34,7 @@
   },
   "devDependencies": {
     "ava": "^0.25.0",
+    "xo": "^0.24.0",
     "pify": "^4.0.0"
   },
   "keywords": [
