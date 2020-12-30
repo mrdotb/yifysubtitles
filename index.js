@@ -3,17 +3,17 @@ const path = require('path');
 const got = require('got');
 const pMap = require('p-map');
 const streamz = require('streamz');
-const unzipper = require('unzipper').Parse;
+const unzipper = require('unzip-stream').Parse;
 const srt2vtt = require('srt-to-vtt');
 const cheerio = require('cheerio');
 
 const langsFormat = require('./langs');
 
-// Down const apiUri = 'http://api.yifysubtitles.com/subs';
-const uri = 'https://www.yifysubtitles.com/movie-imdb';
-const downloadUri = 'https://yifysubtitles.com';
+// Down const apiUri = 'http://api.yts-subs.com/subs';
+const uri = 'https://www.yts-subs.com/movie-imdb';
+const downloadUri = 'https://yifysubtitles.org';
 const langK = Object.keys(langsFormat);
-const langV = langK.map(i => langsFormat[i]);
+const langV = langK.map(i => langsFormat[i]); 
 
 const formatLangLong = lang => langV[langK.indexOf(lang)];
 const formatLangShort = lang => langK[langV.indexOf(lang)];
@@ -67,6 +67,7 @@ const downloadFormat = format => (lang, url, link) => {
     .pipe(
       streamz(entry => {
         const parsedPath = path.parse(entry.path);
+        
         // Add Language to subtitle name and deete spaces
         const escapedLang = lang.replace('/', '-');
         entry.path = entry.path
@@ -80,7 +81,6 @@ const downloadFormat = format => (lang, url, link) => {
             entry.pipe(fs.createWriteStream(fullPath)) :
             entry.pipe(srt2vtt()).pipe(fs.createWriteStream(fullPath));
         }
-
         entry.autodrain();
       })
     )
