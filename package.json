@@ -34,8 +34,8 @@
   },
   "devDependencies": {
     "ava": "^0.25.0",
-    "xo": "^0.24.0",
-    "pify": "^4.0.0"
+    "pify": "^4.0.0",
+    "xo": "^0.40.1"
   },
   "keywords": [
     "download",
